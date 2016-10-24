@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Main Page</title>
+<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+<script src="http://malsup.github.com/jquery.form.js"></script>
+<script>
+	/* Home Function */
+	function homePage() {
+		var string = "A student information system (SIS), student management system, school administration software or student "
+				+ "administration system is a management information system for education establishments to manage student data. Student"
+				+ " information systems provide capabilities for registering students in courses, documenting grading, transcripts, results "
+				+ "of student tests and other assessment scores, building student schedules, tracking student attendance, and managing many"
+				+ " other student-related data needs in a school. A SIS should not be confused with a learning management system or virtual "
+				+ "learning environment, where course materials, assignments and assessment tests can be published electronically."
+				+ "Diagram showing the importance and result of well thought out Student Data Management."
+				+ "The SIS can include features that can be considered as an enterprise resource planning or ERP system"
+				+ " for a corporate customer. As such, many of the issues with ERP system selection methodology, implementation, "
+				+ "and operation of an ERP system apply too.";
+		document.getElementById("p1").innerHTML = string;
+		document.getElementById("p1").style = "color:#2F4F4F";
+	}
+
+	function dobFunc() {
+		var dobDate = document.getElementById("dob").value;
+		alert(dobDate);
+	}
+	var years;
+	/* Register Function */
+	function registerPage() {
+		var string = "<div id='myForm'  class='form-group'><table><tr><td>Age</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td><input type='text' class='form-control' id='age' name='age' disabled/></td></tr>"
+				+ "<tr><td>Roll No</td><td></td><td><input type='number' class='form-control' id='rollNo' min='1'/></td><td></td></tr>"
+				+ "<tr><td>Name</td><td></td><td><input type='text' class='form-control' id='name' required='required'/><td></td></td></tr>"
+				+ "<tr><td>Address</td><td></td><td><input type='text' class='form-control' id='address'/></td><td></td></tr>"
+				+ "<tr><td>Date Of Birth</td><td></td><td>"
+				+ "<input type='text' class='form-control' id='dob' name='birthdate' /></td><td></td></tr>"
+				+ "<tr><td>Gender</td><td></td><td><div class='radio'>"
+				+ "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type='radio' name ='gender' id='gen' value='F'/>Female</div>"
+				+ "<div class='radio'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type='radio' name ='gender' id='gen' value='M'/>Male</div>"
+				+ "<div class='radio'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type='radio' name ='gender' id='gen' value='O' checked/>Other</div></td><td></td></tr>"
+				+ "<tr><td>Course</td><td></td><td><input type='text' class='form-control' id='course'/></td><td></td></tr>"
+				+ "<tr><td>Mobile No</td><td></td><td><input type='text' class='form-control' id='mobileNo'/></td><td></td></tr>"
+				+ "<tr><td colspan='3'><br/><br/><button class='btn btn-default' onclick='registerFunc()'>Register</button></td></tr>"
+				+ "</table></div><h3 id='p2'></h3>";
+
+		document.getElementById("p1").innerHTML = string;
+		$(function() {
+			$('input[name="birthdate"]').daterangepicker({
+				singleDatePicker : true,
+				showDropdowns : true
+			}, function(start, end, label) {
+				years = moment().diff(start, 'years');
+				$(function() {
+					$('#age').val(years)
+				});
+			});
+		});
+
+	}
+
+	function registerFunc() {
+		var string;
+		var age = years;
+		var name = document.getElementById("name").value;
+		var mobileNo = document.getElementById("mobileNo").value;
+		var rollNo = document.getElementById("rollNo").value;
+		var gender;
+		var radios = document.getElementsByName("gender");
+		for (var i = 0, length = radios.length; i < length; i++) {
+			if (radios[i].checked) {
+				gender = radios[i].value;
+			}
+		}
+
+		if (rollNo < 1) {
+			alert("Please enter valid roll number");
+			return false;
+		} else if (name.length < 1 || !isNaN(name) || name.match(/[0-9]/)) {
+			alert("Please enter valid name");
+			return false;
+		} else if (mobileNo.length != 10 || isNaN(mobileNo)) {
+			alert("Please enter valid mobile number");
+			return false;
+		}
+
+		var xhttp = new XMLHttpRequest();
+		var url = "http://192.168.50.226:8282/stud";
+		xhttp.open("POST", url, true);
+		xhttp.setRequestHeader("Content-type", "application/json");
+		xhttp.onreadystatechange = function() {
+			if (xhttp.readyState == 4 && xhttp.status == 200) {
+				string = JSON.stringify(xhttp.responseText);
+				document.getElementById("p2").innerHTML = string;
+				document.getElementById("age").value = null;
+				document.getElementById("rollNo").value = null;
+				document.getElementById("name").value = null;
+				document.getElementById("address").value = null;
+				document.getElementById("course").value = null;
+				document.getElementById("mobileNo").value = null;
+			}
+			if (xhttp.readyState == 4 && xhttp.status == 202) {
+				string = JSON.stringify(xhttp.responseText);
+				document.getElementById("p2").innerHTML = string;
+			}
+			if (xhttp.readyState == 4 && xhttp.status == 417) {
+				string = JSON.stringify(xhttp.responseText);
+				document.getElementById("p2").style.color = "red";
+				document.getElementById("p2").innerHTML = string;
+			}
+		}
+		var stud = JSON.stringify({
+			"age" : document.getElementById("age").value,
+			"rollNo" : document.getElementById("rollNo").value,
+			"name" : document.getElementById("name").value,
+			"address" : document.getElementById("address").value,
+			"dob" : document.getElementById("dob").value,
+			"gender" : gender,
+			"course" : document.getElementById("course").value,
+			"mobileNo" : document.getElementById("mobileNo").value
+		})
+		xhttp.send(stud);
+
+		return false;
+	}
+
+	/* Upload Resume Function */
+	function uploadPage() {
+		var select = "<div><body><h2>File Upload Example</h2><form id='form2' method='post' action='upload' enctype='multipart/form-data'>"
+				+ "Select a file : <input name='file' id='file' type='file' size='45'/><br/><input type='submit' class='btn btn-default' value='Upload File' name='submit'/></form>"
+				+ "<div id='result'></div></body></div><h1 id='p2'></h1>";
+		document.getElementById("p1").innerHTML = select;
+	}
+
+	/* Download Function */
+	function downloadPage() {
+		var string = " ";
+		var files = "";
+		var select = "<div><body><h2>List of Files</h2></body></div><br/><h3 id='p2'></h3>";
+		document.getElementById("p1").innerHTML = select;
+		document.getElementById("p2").innerHTML = "No files available";
+		var xhttp = new XMLHttpRequest();
+		var url = "http://192.168.50.226:8282/downloadList";
+		xhttp.open("GET", url, false);
+		xhttp.setRequestHeader("Content-type", "application/json")
+		xhttp.onreadystatechange = function() {
+			if (xhttp.readyState == 4 && xhttp.status == 200) {
+				string = JSON.parse(xhttp.responseText);
+				for (var i = 0; i < string.length; i++) {
+					files = files
+							+ "<br/><a href='http://192.168.50.226:8282/download?type="
+							+ string[i] + "'>" + string[i] + "</a>";
+					document.getElementById("p2").innerHTML = files;
+
+				}
+			}
+		}
+		xhttp.send();
+		return false;
+	}
+
+	/* Delete Function */
+	function deletePage() {
+		var select = "<div id='myDiv'><body><input type='number' name='rollNo' id='rollNo' required><br/><br/><button onclick='deleteFunc()' class='btn btn-default'>Delete Entry</button></body></div><h3 id='p2'></h3>";
+		document.getElementById("p1").innerHTML = select;
+	}
+
+	function deleteFunc() {
+		var x;
+		var roll = document.getElementById("rollNo").value;
+		var x = document.getElementById("rollNo").value;
+		if (NaN || !x.match(/[0-9]/)) {
+			document.getElementById("p2").innerHTML = "Please enter some ID";
+		} else {
+			if (confirm("Do you really want to delete ID: " + roll) == true) {
+				var xhttp = new XMLHttpRequest();
+				var string;
+				var roll = document.getElementById("rollNo").value;
+				var url = "http://192.168.50.226:8282/stud/" + roll;
+				xhttp.open("DELETE", url, true);
+				xhttp.setRequestHeader("Content-type", "application/json");
+				xhttp.onreadystatechange = function() {
+					if (xhttp.readyState == 4 && xhttp.status == 200) {
+						string = JSON.stringify(xhttp.responseText);
+						document.getElementById("p2").innerHTML = string;
+					} else {
+						document.getElementById("p2").innerHTML = "Student ID not found";
+					}
+				}
+				xhttp.send();
+			} else {
+				document.getElementById("p2").innerHTML = "";
+			}
+		}
+		return false;
+	}
+
+	/* Search Function */
+	function showSinglePage() {
+		var select = "<div id='myDiv'><body><input type='number' name='rollNo' id='rollNo' min='1' minimum='1'><br/><br/><button onclick='showSingleFunc()' class='btn btn-default'>Search</button></body></div><h3 id='p2'></h3>";
+		document.getElementById("p1").innerHTML = select;
+	}
+
+	function showSingleFunc() {
+		var x = document.getElementById("rollNo").value;
+		if (NaN || !x.match(/[0-9]/)) {
+			document.getElementById("p2").innerHTML = "Please enter some ID";
+		} else {
+			var stud;
+			var string = "No such entry available";
+			var xhttp = new XMLHttpRequest();
+			var roll = document.getElementById("rollNo").value;
+			var url = "http://192.168.50.226:8282/stud/" + roll;
+			xhttp.open("GET", url, true);
+			xhttp.setRequestHeader("Content-type", "application/json");
+			xhttp.onreadystatechange = function() {
+				if (xhttp.readyState == 4 && xhttp.status == 200) {
+					stud = JSON.parse(xhttp.responseText);
+					string = "<table width='80%'><tr><td>Age</td><td>"
+							+ stud.age + "</td></tr>"
+							+ "<tr><td>Roll No</td><td>" + stud.rollNo
+							+ "</td></tr>" + "<tr><td>Name</td><td>"
+							+ stud.name + "</td></tr>"
+							+ "<tr><td>Address</td><td>" + stud.address
+							+ "</td></tr>" + "<tr><td>Date Of Birth</td><td>"
+							+ stud.dob + "</td></tr>"
+							+ "<tr><td>Gender</td><td>" + stud.gender
+							+ "</td></tr>" + "<tr><td>Course</td><td>"
+							+ stud.course + "</td></tr>"
+							+ "<tr><td>Mobile No</td><td>" + stud.mobileNo
+							+ "</td></tr>" + "</table></div><h1 id='p2'></h1>";
+					document.getElementById("p2").innerHTML = string;
+				}
+			}
+			xhttp.send();
+			document.getElementById("p2").innerHTML = string;
+		}
+		return false;
+	}
+
+	/* Update Function */
+	function updatePage() {
+		var select = "<div id='myDiv'><body><input type='number' name='rollNo' id='rollNo' required='required'><br/><br/><button onclick='showUpdateFunc()' class='btn btn-default'>Update Information</button></body></div><h3 id='p2'></h3>";
+		document.getElementById("p1").innerHTML = select;
+	}
+
+	function showUpdateFunc() {
+		var x = document.getElementById("rollNo").value;
+		if (isNaN(x) || !x.match(/[0-9]/)) {
+			document.getElementById("p2").innerHTML = "Please enter some ID";
+		} else {
+			var stud;
+			var stuInf = "Please enter valid Student ID";
+			var url = "http://192.168.50.226:8282/stud/"
+					+ document.getElementById("rollNo").value;
+			var xhttp = new XMLHttpRequest();
+			xhttp.open("GET", url, false);
+			xhttp.setRequestHeader("Content-type", "application/json");
+
+			xhttp.onreadystatechange = function() {
+				if (xhttp.readyState == 4 && xhttp.status == 200) {
+					stud = JSON.parse(xhttp.responseText);
+					stuInf = "<div id='myForm'><table width='80%'><tr><td>Age</td><td><input type='number' id='age' value='"+stud.age+"'/></td></tr>"
+							+ "<tr><td>Roll No</td><td><input type='text' id='rollNo' value='"+stud.rollNo+"' disabled/></td></tr>"
+							+ "<tr><td>Name</td><td><input type='text' id='name' value='"+stud.name+"'/></td></tr>"
+							+ "<tr><td>Address</td><td><input type='text' id='address' value='"+stud.address+"'/></td></tr>"
+							+ "<tr><td>Date Of Birth</td><td><input type='text' id='dob' value='"+stud.dob+"'/></td></tr>"
+							+ "<tr><td>Gender</td><td><input type='text' id='gender' value='"+stud.gender+"' maxlength='1'/></td></tr>"
+							+ "<tr><td>Course</td><td><input type='text' id='course' value='"+stud.course+"'/></td></tr>"
+							+ "<tr><td>Mobile No</td><td><input type='text' id='mobileNo' value='"+stud.mobileNo+"'/></td></tr>"
+							+ "<tr><td colspan='2'><button onclick='updateFunc()'>Update</button></td></tr>"
+							+ "</table></div>";
+					document.getElementById("p2").innerHTML = stuInf;
+				}
+			};
+			xhttp.send();
+
+			document.getElementById("p2").innerHTML = stuInf;
+		}
+
+		return false;
+	}
+
+	function updateFunc() {
+		var studUpdate;
+		var age = document.getElementById("age").value;
+		var name = document.getElementById("name").value;
+		var mobileNo = document.getElementById("mobileNo").value;
+		var rollNo = document.getElementById("rollNo").value;
+		var gender = document.getElementById("gender").value;
+		if (age<1 || age>125) {
+			alert("Please enter valid age");
+			return false;
+		} else if (rollNo < 1) {
+			alert("Please enter valid roll number");
+		} else if (name.length < 1 || !isNaN(name) || name.match(/[0-9]/)) {
+			alert("Please enter valid name");
+			return false;
+		} else if (gender.match(/[^M,F,O]/)) {
+			alert("Please enter either \"M\"\"F\"\"O\" for Male, Female or Other respectively ");
+			return false;
+		} else if (mobileNo.length != 10 || isNaN(mobileNo)) {
+			alert("Please enter valid mobile number");
+			return false;
+		}
+		var url = "http://192.168.50.226:8282/stud/"
+				+ document.getElementById("rollNo").value;
+		var xhttp = new XMLHttpRequest();
+		xhttp.open("PUT", url, true);
+		xhttp.setRequestHeader("Content-type", "application/json");
+		xhttp.onreadystatechange = function() {
+			if (xhttp.readyState == 4 && xhttp.status == 200) {
+				/* alert("working properly"); */
+			}
+			if (xhttp.readyState == 4 && xhttp.status == 417) {
+				string = JSON.stringify(xhttp.responseText);
+				document.getElementById("p2").style.color = "red";
+				document.getElementById("p2").innerHTML = string;
+			}
+		}
+		studUpdate = JSON.stringify({
+			"age" : document.getElementById("age").value,
+			"rollNo" : document.getElementById("rollNo").value,
+			"name" : document.getElementById("name").value,
+			"address" : document.getElementById("address").value,
+			"dob" : document.getElementById("dob").value,
+			"gender" : document.getElementById("gender").value,
+			"course" : document.getElementById("course").value,
+			"mobileNo" : document.getElementById("mobileNo").value
+		})
+
+		xhttp.send(studUpdate);
+		document.getElementById("p2").innerHTML = "You can search all updated students data in Show All tab.";
+		return false;
+	}
+
+	/* Show All Func */
+	function showAllPage() {
+		var stud;
+		var i;
+		var string = "";
+		var xhttp = new XMLHttpRequest();
+		var url = "http://192.168.50.226:8282/stud";
+		xhttp.open("GET", url, true);
+		xhttp.setRequestHeader("Content-type", "application/json");
+		xhttp.onreadystatechange = function() {
+			if (xhttp.readyState == 4 && xhttp.status == 200) {
+				stud = JSON.parse(xhttp.responseText);
+				if (typeof stud != string) {
+					for (i = 0; i < stud.length; i++) {
+						string = string + "<tr><td>" + stud[i].rollNo
+								+ "</td><td>" + stud[i].age + "</td><td>"
+								+ stud[i].name + "</td><td>" + stud[i].address
+								+ "</td><td>" + stud[i].dob + "</td><td>"
+								+ stud[i].gender + "</td><td>" + stud[i].course
+								+ "</td><td>" + stud[i].mobileNo + "</td></tr>";
+					}
+					document.getElementById("p1").innerHTML = "<table id='showAllStudents' border='2px' class='table table-striped table-hover' width='100%'><thead><tr><th>Roll No</th><th>Age</th><th>Name</th><th>Address</th><th>Date Of Birth</th><th>Gender</th><th>Course</th><th>Mobile No</th></tr></thead><tbody>"
+							+ string + "</tbody></table><hr/>";
+				}
+			}
+			if (xhttp.readyState == 4 && xhttp.status == 202) {
+				stud = JSON.stringify(xhttp.responseText);
+				document.getElementById("p1").style.fontSize = "x-large";
+				document.getElementById("p1").innerHTML = stud;
+
+			}
+		}
+		xhttp.send();
+		return false;
+	}
+</script>
+<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet"
+	href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script
+	src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script type="text/javascript"
+	src="//cdn.jsdelivr.net/jquery/1/jquery.min.js"></script>
+<script type="text/javascript"
+	src="//cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<link rel="stylesheet" type="text/css"
+	href="//cdn.jsdelivr.net/bootstrap/latest/css/bootstrap.css" />
+<script type="text/javascript" src="/lib/daterangepicker.js"></script>
+<script type="text/javascript" src="/lib/bootstrap.min.css"></script>
+<link rel="stylesheet" type="text/css"
+	href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
+
+</head>
+<body onload="homePage()">
+	<div class="container">
+		<h1 style="text-align: center; color: #2F4F4F">Student Management
+			System</h1>
+		<hr />
+		<ul class="nav nav-tabs">
+			<li><a onclick="homePage()" data-toggle="tab"
+				aria-expanded="false">Home</a></li>
+			<li><a onclick="registerPage()" data-toggle="tab"
+				aria-expanded="true">Registration</a></li>
+			<li><a onclick="updatePage()" data-toggle="tab"
+				aria-expanded="false">Update</a></li>
+			<li><a onclick="deletePage()" data-toggle="tab"
+				aria-expanded="false">Delete</a></li>
+			<li><a onclick="showSinglePage()" data-toggle="tab"
+				aria-expanded="false">Show By ID</a></li>
+			<li><a onclick="showAllPage()" data-toggle="tab"
+				aria-expanded="false">Show All</a></li>
+			<li><a onclick="uploadPage()" data-toggle="tab"
+				aria-expanded="false">Upload Resume</a></li>
+			<li><a onclick="downloadPage()" data-toggle="tab"
+				aria-expanded="false">Uploaded Contents</a></li>
+		</ul>
+		<br /> <br /> <br />
+		<p id="p1"></p>
+		<h3 id="showAll"></h3>
+	</div>
+</body>
+</html>

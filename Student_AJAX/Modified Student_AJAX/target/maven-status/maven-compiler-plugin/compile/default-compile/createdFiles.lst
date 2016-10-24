@@ -1,0 +1,11 @@
+com\example\service\StudentServiceImpl.class
+com\example\controller\UploadDownload.class
+com\example\dao\StudentDao.class
+com\example\dao\StudentDaoImpl.class
+com\example\ServletInitializer.class
+com\example\uitls\JDBCUtility.class
+com\example\controller\StudentController.class
+com\example\StrudentSpringBootRestApplication.class
+com\example\controller\JSPController.class
+com\example\model\Student.class
+com\example\service\StudentService.class
